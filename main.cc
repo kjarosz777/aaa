@@ -1,37 +1,32 @@
 // #include <iostream>
+#include "fmt/core.h"
 #include <fcntl.h>
 #include <poll.h>
+#include <span>
 #include <stdio.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <vector>
 
-int main(int argc, char* argv[])
+int main(int argc, const char* argv[])
 {
-  (void)argc;
-  (void)argv;
+  const std::span<const char*> arguments(argv, argc);
 
-  // printf("Hello World!\n");
-
-  // pid_t pid = getpid();
-
-  // printf("pid: %lun\n", pid);
-
-  if (2 != argc)
+  if (2 != arguments.size())
   {
-    puts("Wrong argument count (should be 2)\n");
+    fmt::print("Wrong argument count (should be 2, provided {})\n", arguments.size());
     return -1;
   }
 
-  const int fd = open(argv[1], O_RDONLY | O_NONBLOCK);
+  const int fd = open(arguments.back(), O_RDONLY | O_NONBLOCK);
   if (0 > fd)
   {
-    printf("error opening %s (%d)\n", argv[1], fd);
+    fmt::print("error opening {} ({})\n", arguments.back(), fd);
     return -1;
   }
 
-  printf("opened %s (fd: %d)\n", argv[1], fd);
+  fmt::print("opened {} (fd: {})\n", arguments.back(), fd);
 
-  // designated initializer (C99 / C++20)
   pollfd info = {
       .fd      = fd,
       .events  = POLLIN,
@@ -40,7 +35,7 @@ int main(int argc, char* argv[])
 
   const int retval = poll(&info, 1, 100'000);
 
-  printf("poll returned %d\n", retval);
+  fmt::print("poll returned {}\n", retval);
 
   close(fd);
 
