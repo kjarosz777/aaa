@@ -1,5 +1,4 @@
 #include "file_descriptor.hh"
-#include "fmt/core.h"
 
 #include <fcntl.h>
 #include <poll.h>
@@ -13,22 +12,22 @@ int main(int argc, const char* argv[])
 
   if (2 != arguments.size())
   {
-    fmt::print("Wrong argument count (should be 2, provided {})\n", arguments.size());
+    printf("Wrong argument count (should be 2, provided %lu)\n", arguments.size());
     return -1;
   }
 
   const FileDescriptor fd(open(arguments.back(), O_RDONLY | O_NONBLOCK));
   if (!fd.IsValid())
   {
-    fmt::print("error opening {} ({})\n", arguments.back(), fd.Get());
+    printf("error opening %s (%d)\n", arguments.back(), fd.Get());
     return -1;
   }
 
-  fmt::print("opened {} (fd: {})\n", arguments.back(), fd.Get());
+  printf("opened %s (fd: %d)\n", arguments.back(), fd.Get());
 
   const int retval = fd.Poll(POLLIN, POLLIN);
 
-  fmt::print("poll returned {}\n", retval);
+  printf("poll returned %d\n", retval);
 
   return 0;
 }
