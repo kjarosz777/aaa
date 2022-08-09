@@ -1,11 +1,12 @@
 // #include <iostream>
+#include <fcntl.h>
+#include <poll.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <poll.h>
-#include <fcntl.h>
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[])
+{
   (void)argc;
   (void)argv;
 
