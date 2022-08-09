@@ -8,7 +8,11 @@ set(BUILD_SHARED_LIBS TRUE)
 add_subdirectory(fmt)
 find_package(fmt)
 
-add_executable(${PROJECT_NAME} main.cc)
+add_executable(${PROJECT_NAME}
+  main.cc
+  file_descriptor.cc
+  )
+
 target_link_libraries(${PROJECT_NAME} fmt::fmt)
 
 install(TARGETS ${PROJECT_NAME})
