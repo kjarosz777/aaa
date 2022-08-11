@@ -34,18 +34,22 @@ void runWriteMmap(const int& fd ) {
 
   size_t sizeOfMemory = 32 * sizeof(int);
 
-  auto memory = mmap(NULL, sizeOfMemory, PROT_WRITE, MAP_SHARED, fd, 0);
+  auto memory = mmap(NULL, sizeOfMemory, PROT_WRITE | PROT_READ, MAP_SHARED, fd, 0);
   if (memory == MAP_FAILED)
   {
-    // fprintf(stderr, "error runWriteMmap errno=%d perror: ", errno);
-    // perror("");
     printf("Error runWriteMmap errno: %s\n", strerror(errno));
     return;
   }
 
-  int* memoryInt = reinterpret_cast<int*>(memory);
+  printf("MMAP ptr: %p\n", memory);
 
-  std::fill(memoryInt, memoryInt + 32, 99);
+  int* memoryInt = reinterpret_cast<int*>(memory);
+  printf("first memoryInt %d\n", *memoryInt);
+
+  // for (int i = 0; i < 32; ++i)
+  // {
+  //     printf("%lu: memoryInt %d\n", i, *(memoryInt+i));
+  // }
 
   munmap(memory, sizeOfMemory);
 }
