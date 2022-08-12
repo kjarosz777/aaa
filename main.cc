@@ -32,9 +32,10 @@ void runWrite(const int& fd ) {
 
 void runWriteMmap(const int& fd ) {
 
-  size_t sizeOfMemory = 32 * sizeof(int);
+  // size_t sizeOfMemory = 32 * sizeof(int);
+  long page_size = sysconf(_SC_PAGE_SIZE);
 
-  auto memory = mmap(NULL, sizeOfMemory, PROT_WRITE | PROT_READ, MAP_SHARED, fd, 0);
+  auto memory = mmap(NULL, page_size, PROT_WRITE | PROT_READ, MAP_SHARED, fd, 0);
   if (memory == MAP_FAILED)
   {
     printf("Error runWriteMmap errno: %s\n", strerror(errno));
@@ -43,15 +44,18 @@ void runWriteMmap(const int& fd ) {
 
   printf("MMAP ptr: %p\n", memory);
 
-  int* memoryInt = reinterpret_cast<int*>(memory);
-  printf("first memoryInt %d\n", *memoryInt);
+  char* memoryChar = reinterpret_cast<char*>(memory);
+  printf("String in memory: %s\n", memoryChar);
 
+  strcpy(memoryChar, "qwer");
+
+  printf("String in memory2: %s\n", memoryChar);
   // for (int i = 0; i < 32; ++i)
   // {
   //     printf("%lu: memoryInt %d\n", i, *(memoryInt+i));
   // }
 
-  munmap(memory, sizeOfMemory);
+  munmap(memory, page_size);
 }
 
 void runRead(const int& fd ) {
