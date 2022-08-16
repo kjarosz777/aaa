@@ -17,9 +17,9 @@
 void runWrite(const int& fd ) {
 	int num_to_write = getpid();
 
-  printf("Writing: %d", num_to_write);
   // write to pipe
   printf("******************\n");
+  printf("Writing: %d\n", num_to_write);
   ssize_t ret = write(fd, &num_to_write, sizeof(int));
   if ( ret <= 0) {
     fprintf(stderr, "error writing ret=%ld errno=%d perror: ", ret, errno);
@@ -31,23 +31,46 @@ void runWrite(const int& fd ) {
 }
 
 void runWriteMmap(const int& fd ) {
+  long page_size = sysconf(_SC_PAGE_SIZE);
 
-  size_t sizeOfMemory = 32 * sizeof(int);
-
-  auto memory = mmap(NULL, sizeOfMemory, PROT_WRITE, MAP_SHARED, fd, 0);
+  auto memory = mmap(NULL, page_size, PROT_WRITE | PROT_READ, MAP_SHARED, fd, 0);
   if (memory == MAP_FAILED)
   {
-    // fprintf(stderr, "error runWriteMmap errno=%d perror: ", errno);
-    // perror("");
     printf("Error runWriteMmap errno: %s\n", strerror(errno));
     return;
   }
 
-  int* memoryInt = reinterpret_cast<int*>(memory);
+  printf("runWriteMmap MMAP ptr: %p\n", memory);
 
-  std::fill(memoryInt, memoryInt + 32, 99);
+  int* memoryValue = reinterpret_cast<int*>(memory);
+  for (int i = 0; i < 32; ++i)
+  {
+      printf("%d: setting memoryValue: %d\n", i, 999);
+      *(memoryValue+i) = 999;
+  }
 
-  munmap(memory, sizeOfMemory);
+  munmap(memory, page_size);
+}
+
+void runReadMmap(const int& fd ) {
+  long page_size = sysconf(_SC_PAGE_SIZE);
+
+  auto memory = mmap(NULL, page_size, PROT_WRITE | PROT_READ, MAP_SHARED, fd, 0);
+  if (memory == MAP_FAILED)
+  {
+    printf("Error runReadMmap errno: %s\n", strerror(errno));
+    return;
+  }
+
+  printf("runReadMmap MMAP ptr: %p\n", memory);
+
+  int* memoryValue = reinterpret_cast<int*>(memory);
+  for (int i = 0; i < 32; ++i)
+  {
+      printf("%d: reading memoryValue: %d\n", i, *(memoryValue+i));
+  }
+
+  munmap(memory, page_size);
 }
 
 void runRead(const int& fd ) {
@@ -55,7 +78,6 @@ void runRead(const int& fd ) {
 
   ssize_t ret = read(fd, &num_read, sizeof(int));
   if( ret > 0) {
-    //printf("Number read: %d ", ret);
     printf("*************************\n");
     printf("Number read from buffer device: %d\n",num_read);
     printf("Bytes read: %ld\n", ret);
@@ -94,6 +116,11 @@ int readOrWrite(int argc, const char *argv[]) {
   {
     printf("Running runWriteMmap\n");
     runWriteMmap(fd);
+  }
+  else if ("rm" == variant)
+  {
+    printf("Running runWriteMmap\n");
+    runReadMmap(fd);
   }
 
 	close(fd);
